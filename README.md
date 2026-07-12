@@ -1,4 +1,7 @@
 # agents-wizard
+[![npm version](https://img.shields.io/npm/v/@fclef819/agents-wizard.svg)](https://www.npmjs.com/package/@fclef819/agents-wizard)
+[![npm downloads](https://img.shields.io/npm/dw/@fclef819/agents-wizard.svg)](https://www.npmjs.com/package/@fclef819/agents-wizard)
+[![license](https://img.shields.io/npm/l/@fclef819/agents-wizard.svg)](https://github.com/fclef819/agents-wizard/blob/main/LICENSE)
 
 `agents-wizard` is an interactive CLI that creates an `AGENTS.md` for a new project.
 

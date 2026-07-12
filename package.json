@@ -2,6 +2,7 @@
   "name": "@fclef819/agents-wizard",
   "version": "0.1.0",
   "description": "Interactive AGENTS.md generator",
+  "license": "MIT",
   "type": "module",
   "bin": { "agents-wizard": "./dist/cli.js" },
   "files": ["dist", "questions.yaml", "README.md"],

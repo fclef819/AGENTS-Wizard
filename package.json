@@ -1,6 +1,6 @@
 {
   "name": "@fclef819/agents-wizard",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Interactive AGENTS.md generator",
   "license": "MIT",
   "type": "module",

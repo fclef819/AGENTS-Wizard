@@ -1,5 +1,5 @@
 {
-  "name": "agents-wizard",
+  "name": "@fclef819/agents-wizard",
   "version": "0.1.0",
   "description": "Interactive AGENTS.md generator",
   "type": "module",

@@ -1,0 +1,1181 @@
+version: 1
+
+wizard:
+  title: AGENTS.md Wizard
+  output_file: AGENTS.md
+  answer_record_file: .agents-wizard.yml
+  default_skippable: true
+  history_limit: 3
+  template_promotion_usage_threshold: 2
+  top_level_questions:
+    - project.status
+    - project.purpose
+    - technology.stack
+    - repository.structure
+    - architecture.style
+    - setup.status
+    - testing.environment
+    - code_style.priority
+    - refactoring.scope
+    - dependencies.addition_policy
+    - compatibility.policy
+    - guardrails
+    - completion.report
+
+rendering:
+  heading_level: 2
+  heading_language: en
+  option_order: definition
+  multi_select_order: definition
+  omit_empty_sections: true
+  omit_skipped_answers: true
+  placeholder_syntax: "{{ value }}"
+  line_ending: LF
+  encoding: UTF-8
+
+sections:
+  project_overview:
+    title: Project Overview
+    order: 10
+
+  technology_stack:
+    title: Technology Stack
+    order: 20
+
+  repository_structure:
+    title: Repository Structure
+    order: 30
+
+  architecture:
+    title: Architecture
+    order: 40
+
+  setup_and_commands:
+    title: Setup and Commands
+    order: 50
+
+  testing:
+    title: Testing
+    order: 60
+
+  code_style:
+    title: Code Style
+    order: 70
+
+  refactoring:
+    title: Refactoring
+    order: 80
+
+  dependencies:
+    title: Dependencies
+    order: 90
+
+  compatibility:
+    title: Compatibility
+    order: 100
+
+  guardrails:
+    title: Guardrails
+    order: 110
+
+  completion_report:
+    title: Completion Report
+    order: 120
+
+questions:
+  project.status:
+    label: このプロジェクトは、現在どの段階ですか？
+    type: single_select
+    order: 10
+    skippable: false
+    output: null
+    options:
+      - id: new
+        label: 新規・立ち上げ中
+      - id: existing
+        label: 既存・運用中
+
+  project.purpose:
+    label: このプロジェクトの目的は何ですか？
+    type: text
+    order: 20
+    skippable: true
+    input:
+      kind: plain
+      prefix: このプロジェクトは、
+      history:
+        enabled: true
+      user_template:
+        enabled: true
+    output:
+      section: project_overview
+      kind: paragraph
+      template: "このプロジェクトは{{ value }}"
+
+  technology.stack:
+    label: 主に使用する技術は何ですか？
+    type: multi_select
+    order: 30
+    skippable: true
+    allow_custom: true
+    custom_input:
+      label: 自由入力
+      repeatable: true
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: technology_stack
+      kind: selected_values_bullets
+      value_source: option_label_or_custom_value
+    options:
+      - id: python
+        label: Python
+        recommendation:
+          files_any:
+            - pyproject.toml
+            - requirements.txt
+            - setup.py
+          score: 100
+      - id: typescript
+        label: TypeScript
+        recommendation:
+          files_any:
+            - tsconfig.json
+          score: 120
+      - id: javascript
+        label: JavaScript
+        recommendation:
+          files_any:
+            - package.json
+          score: 60
+      - id: java
+        label: Java
+        recommendation:
+          files_any:
+            - pom.xml
+            - build.gradle
+            - build.gradle.kts
+          score: 100
+      - id: kotlin
+        label: Kotlin
+        recommendation:
+          files_any:
+            - build.gradle.kts
+          score: 90
+      - id: go
+        label: Go
+        recommendation:
+          files_any:
+            - go.mod
+          score: 100
+      - id: rust
+        label: Rust
+        recommendation:
+          files_any:
+            - Cargo.toml
+          score: 100
+      - id: php
+        label: PHP
+        recommendation:
+          files_any:
+            - composer.json
+          score: 100
+      - id: ruby
+        label: Ruby
+        recommendation:
+          files_any:
+            - Gemfile
+          score: 100
+      - id: csharp
+        label: C#
+        recommendation:
+          globs_any:
+            - "*.csproj"
+            - "*.sln"
+          score: 100
+      - id: c
+        label: C
+      - id: cpp
+        label: C++
+        recommendation:
+          files_any:
+            - CMakeLists.txt
+          score: 80
+      - id: shell
+        label: Shell
+      - id: nodejs
+        label: Node.js
+        recommendation:
+          files_any:
+            - package.json
+          score: 50
+      - id: react
+        label: React
+      - id: vue
+        label: Vue
+      - id: nextjs
+        label: Next.js
+      - id: django
+        label: Django
+      - id: flask
+        label: Flask
+      - id: fastapi
+        label: FastAPI
+      - id: spring_boot
+        label: Spring Boot
+      - id: postgresql
+        label: PostgreSQL
+      - id: mysql
+        label: MySQL / MariaDB
+      - id: sqlite
+        label: SQLite
+      - id: docker
+        label: Docker
+        recommendation:
+          files_any:
+            - Dockerfile
+            - compose.yml
+            - compose.yaml
+            - docker-compose.yml
+            - docker-compose.yaml
+          score: 80
+
+  repository.structure:
+    label: リポジトリの構成はどれに近いですか？
+    type: single_select
+    order: 40
+    skippable: true
+    options:
+      - id: single_application
+        label: 単一アプリケーション
+        output:
+          section: repository_structure
+          kind: paragraph
+          markdown: このリポジトリは単一のアプリケーションで構成されています。
+
+      - id: frontend_backend_monorepo
+        label: フロントエンド・バックエンド分離のモノレポ
+        followups:
+          - repository.frontend_root
+          - repository.backend_root
+          - repository.shared_root
+        output:
+          section: repository_structure
+          kind: paragraph
+          markdown: このリポジトリは、フロントエンドとバックエンドを分離したモノレポです。
+
+      - id: multiple_applications_monorepo
+        label: 複数アプリケーションのモノレポ
+        followups:
+          - repository.applications
+        output:
+          section: repository_structure
+          kind: paragraph
+          markdown: このリポジトリは複数のアプリケーションを含むモノレポです。
+
+      - id: multiple_packages_monorepo
+        label: 複数パッケージのモノレポ
+        followups:
+          - repository.package_root
+        output:
+          section: repository_structure
+          kind: paragraph
+          markdown: このリポジトリは複数のパッケージを含むモノレポです。
+
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: リポジトリ構成を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: repository_structure
+          kind: paragraph
+          template: "{{ value }}"
+
+  repository.frontend_root:
+    label: フロントエンドのルートパスは？
+    type: text
+    order: 41
+    skippable: false
+    input:
+      kind: path
+      placeholder: frontend/
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: repository_structure
+      kind: bullet
+      template: "フロントエンド: `{{ value }}`"
+
+  repository.backend_root:
+    label: バックエンドのルートパスは？
+    type: text
+    order: 42
+    skippable: false
+    input:
+      kind: path
+      placeholder: backend/
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: repository_structure
+      kind: bullet
+      template: "バックエンド: `{{ value }}`"
+
+  repository.shared_root:
+    label: 共通コードのルートパスは？
+    type: text
+    order: 43
+    skippable: true
+    input:
+      kind: path
+      placeholder: shared/
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: repository_structure
+      kind: bullet
+      template: "共通コード: `{{ value }}`"
+
+  repository.applications:
+    label: アプリケーション名とルートパスを追加してください
+    type: pair_list
+    order: 44
+    skippable: false
+    min_items: 1
+    fields:
+      - id: name
+        label: アプリケーション名
+        kind: plain
+      - id: path
+        label: ルートパス
+        kind: path
+    history:
+      enabled: false
+    output:
+      section: repository_structure
+      kind: pair_bullets
+      template: "{{ name }}: `{{ path }}`"
+
+  repository.package_root:
+    label: パッケージの配置先は？
+    type: text
+    order: 45
+    skippable: false
+    input:
+      kind: path
+      placeholder: packages/
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: repository_structure
+      kind: bullet
+      template: "パッケージ: `{{ value }}`"
+
+  architecture.style:
+    label: 採用しているアーキテクチャや設計方針はありますか？
+    type: single_select
+    order: 50
+    skippable: true
+    options:
+      - id: layered
+        label: レイヤードアーキテクチャ
+        followups:
+          - architecture.rules
+        output:
+          section: architecture
+          kind: paragraph
+          markdown: このプロジェクトはレイヤードアーキテクチャを採用しています。
+
+      - id: clean
+        label: クリーンアーキテクチャ
+        followups:
+          - architecture.rules
+        output:
+          section: architecture
+          kind: paragraph
+          markdown: このプロジェクトはクリーンアーキテクチャを採用しています。
+
+      - id: hexagonal
+        label: ヘキサゴナルアーキテクチャ
+        followups:
+          - architecture.rules
+        output:
+          section: architecture
+          kind: paragraph
+          markdown: このプロジェクトはヘキサゴナルアーキテクチャを採用しています。
+
+      - id: mvc
+        label: MVC
+        followups:
+          - architecture.rules
+        output:
+          section: architecture
+          kind: paragraph
+          markdown: このプロジェクトはMVCを採用しています。
+
+      - id: modular_monolith
+        label: モジュラーモノリス
+        followups:
+          - architecture.rules
+        output:
+          section: architecture
+          kind: paragraph
+          markdown: このプロジェクトはモジュラーモノリスとして構成されています。
+
+      - id: none
+        label: 特定のアーキテクチャは採用していない
+        output: null
+
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: 採用している構成を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        followups:
+          - architecture.rules
+        output:
+          section: architecture
+          kind: paragraph
+          template: "{{ value }}"
+
+  architecture.rules:
+    label: 特に守るべき設計ルールはありますか？
+    type: multi_select
+    order: 51
+    skippable: true
+    allow_custom: true
+    custom_input:
+      label: 自由入力
+      repeatable: true
+      history:
+        enabled: true
+      user_template:
+        enabled: true
+    output:
+      section: architecture
+      kind: selected_option_bullets
+    options:
+      - id: dependency_direction
+        label: レイヤー間の依存方向を守る
+        markdown: レイヤー間の依存方向を維持してください。
+      - id: domain_independence
+        label: ドメイン層を外部技術へ依存させない
+        markdown: ドメイン層をフレームワークや外部サービスへ依存させないでください。
+      - id: public_interfaces
+        label: モジュール間は公開インターフェースを介する
+        markdown: モジュール間の依存は公開インターフェースを介してください。
+      - id: no_layer_bypass
+        label: レイヤーを飛び越えてアクセスしない
+        markdown: レイヤーを飛び越えた直接アクセスは避けてください。
+      - id: follow_existing_patterns
+        label: 既存の設計パターンに合わせる
+        markdown: 新しい構造を独自に導入せず、既存の設計パターンに合わせてください。
+
+  setup.status:
+    label: セットアップ・起動・ビルド手順は確定していますか？
+    type: single_select
+    order: 60
+    skippable: true
+    skip_recommendation:
+      answer_equals:
+        question: project.status
+        option: new
+    options:
+      - id: all_defined
+        label: すべて確定している
+        followups:
+          - setup.prerequisites
+          - setup.install_command
+          - setup.start_command
+          - setup.build_command
+        output: null
+      - id: partially_defined
+        label: 一部だけ確定している
+        followups:
+          - setup.prerequisites
+          - setup.install_command
+          - setup.start_command
+          - setup.build_command
+        output: null
+      - id: undecided
+        label: まだ確定していない
+        output: null
+
+  setup.prerequisites:
+    label: 事前に必要なツールや初期化処理はありますか？
+    type: list
+    order: 61
+    skippable: true
+    item:
+      kind: plain
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: setup_and_commands
+      kind: bullets
+      lead: 事前に以下を準備してください。
+
+  setup.install_command:
+    label: 依存関係のインストールコマンドは？
+    type: text
+    order: 62
+    skippable: true
+    input:
+      kind: command
+      placeholder: uv sync
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: setup_and_commands
+      kind: command_block
+      lead: 依存関係は次のコマンドでインストールしてください。
+      language: bash
+      template: "{{ value }}"
+
+  setup.start_command:
+    label: 開発時の起動コマンドは？
+    type: text
+    order: 63
+    skippable: true
+    input:
+      kind: command
+      placeholder: uv run app
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: setup_and_commands
+      kind: command_block
+      lead: 開発時は次のコマンドで起動してください。
+      language: bash
+      template: "{{ value }}"
+
+  setup.build_command:
+    label: ビルドコマンドは？
+    type: text
+    order: 64
+    skippable: true
+    input:
+      kind: command
+      placeholder: uv build
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: setup_and_commands
+      kind: command_block
+      lead: ビルドには次のコマンドを使用してください。
+      language: bash
+      template: "{{ value }}"
+
+  testing.environment:
+    label: テスト環境はありますか？
+    type: single_select
+    order: 70
+    skippable: true
+    skip_recommendation:
+      answer_equals:
+        question: project.status
+        option: new
+    options:
+      - id: available
+        label: テスト環境がある
+        followups:
+          - testing.run_all
+          - testing.run_targeted
+          - testing.policy
+          - testing.unavailable_policy
+        output: null
+      - id: partial
+        label: 一部にだけテスト環境がある
+        followups:
+          - testing.run_all
+          - testing.run_targeted
+          - testing.policy
+          - testing.unavailable_policy
+        output:
+          section: testing
+          kind: paragraph
+          markdown: テスト環境が存在しない箇所では、変更内容に応じた代替確認を行ってください。
+      - id: none
+        label: テスト環境がない
+        followups:
+          - testing.policy_without_environment
+          - testing.unavailable_policy
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 現在、このプロジェクトには自動テスト環境がありません。
+      - id: undecided
+        label: まだ未確定
+        output: null
+
+  testing.run_all:
+    label: 全テスト実行コマンドは？
+    type: text
+    order: 71
+    skippable: true
+    input:
+      kind: command
+      placeholder: uv run pytest
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: testing
+      kind: command_block
+      lead: 変更後は次のコマンドでテストを実行してください。
+      language: bash
+      template: "{{ value }}"
+
+  testing.run_targeted:
+    label: 対象を絞ってテストするコマンドや方法は？
+    type: text
+    order: 72
+    skippable: true
+    input:
+      kind: command
+      placeholder: uv run pytest path/to/test.py
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: testing
+      kind: command_block
+      lead: 対象を絞って確認する場合は、次の形式を使用してください。
+      language: bash
+      template: "{{ value }}"
+
+  testing.policy:
+    label: 変更時のテスト方針は？
+    type: single_select
+    order: 73
+    skippable: true
+    options:
+      - id: tests_required
+        label: 変更に対応するテスト追加を必須とする
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 変更に対応する自動テストを追加または更新してください。
+      - id: tests_when_possible
+        label: 可能な限りテストを追加する
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 変更内容に対する自動テストを、可能な限り追加または更新してください。
+      - id: existing_tests_only
+        label: 既存テストの実行のみ必須とする
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 新しいテストの追加は必須ではありませんが、関連する既存テストは実行してください。
+      - id: no_test_addition
+        label: テスト追加は求めない
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 明示的に依頼されない限り、新しいテストの追加は不要です。
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: テスト方針を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: testing
+          kind: paragraph
+          template: "{{ value }}"
+
+  testing.policy_without_environment:
+    label: テスト環境がない場合、どう確認しますか？
+    type: single_select
+    order: 74
+    skippable: true
+    options:
+      - id: manual_verification
+        label: 手動確認を行う
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 自動テストを実行できないため、変更内容に応じた手動確認を行ってください。
+      - id: propose_test_setup
+        label: テスト基盤の追加を提案する
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 必要に応じてテスト基盤の追加を提案してください。ただし、依頼なく大規模なテスト基盤を導入しないでください。
+      - id: no_verification_required
+        label: 明示的な確認は求めない
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 明示的に依頼されない限り、テスト基盤の追加や手動確認は不要です。
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: 確認方針を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: testing
+          kind: paragraph
+          template: "{{ value }}"
+
+  testing.unavailable_policy:
+    label: テストを実行できない場合、どう扱いますか？
+    type: single_select
+    order: 75
+    skippable: true
+    options:
+      - id: report_reason
+        label: 理由と未確認事項を報告する
+        output:
+          section: testing
+          kind: paragraph
+          markdown: テストを実行できない場合は、その理由と未確認事項を作業完了時に報告してください。
+      - id: manual_alternative
+        label: 代替の手動確認を行う
+        output:
+          section: testing
+          kind: paragraph
+          markdown: テストを実行できない場合は、可能な範囲で代替の手動確認を行い、その内容を報告してください。
+      - id: stop_and_ask
+        label: 作業を止めて確認する
+        output:
+          section: testing
+          kind: paragraph
+          markdown: 必要なテストを実行できない場合は、推測で進めず確認してください。
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: テスト不能時の扱いを、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: testing
+          kind: paragraph
+          template: "{{ value }}"
+
+  code_style.priority:
+    label: コードスタイルでは何を優先しますか？
+    type: single_select
+    order: 80
+    skippable: true
+    followups:
+      - code_style.commands
+    options:
+      - id: formatter_and_linter
+        label: フォーマッターとリンターの設定
+        output:
+          section: code_style
+          kind: paragraph
+          markdown: フォーマッターとリンターの設定を優先し、その結果に従ってください。
+      - id: existing_code
+        label: 既存コードの記述スタイル
+        output:
+          section: code_style
+          kind: paragraph
+          markdown: 既存コードの設計、命名規則、記述形式に合わせて実装してください。
+      - id: project_rules
+        label: プロジェクト固有のコーディング規約
+        output:
+          section: code_style
+          kind: paragraph
+          markdown: プロジェクト固有のコーディング規約を優先してください。
+      - id: language_conventions
+        label: 言語やフレームワークの一般的な慣習
+        output:
+          section: code_style
+          kind: paragraph
+          markdown: 既存の規約がない場合は、使用言語やフレームワークの一般的な慣習に従ってください。
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: コードスタイル方針を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: code_style
+          kind: paragraph
+          template: "{{ value }}"
+
+  code_style.commands:
+    label: 変更後に実行する整形・静的解析コマンドはありますか？
+    type: list
+    order: 81
+    skippable: true
+    item:
+      kind: command
+      history:
+        enabled: true
+      user_template:
+        enabled: false
+    output:
+      section: code_style
+      kind: command_list
+      lead: 変更後は以下のコマンドを実行してください。
+      language: bash
+
+  refactoring.scope:
+    label: 依頼範囲外のリファクタリングをどう扱いますか？
+    type: single_select
+    order: 90
+    skippable: true
+    options:
+      - id: forbidden
+        label: 行わない
+        output:
+          section: refactoring
+          kind: paragraph
+          markdown: 依頼された変更に直接関係しないリファクタリングは行わないでください。
+      - id: local_only
+        label: 変更箇所周辺の小規模な改善のみ許可する
+        output:
+          section: refactoring
+          kind: paragraph
+          markdown: 変更箇所周辺に限り、挙動を変えない小規模なリファクタリングを行って構いません。
+      - id: proposal_only
+        label: 必要性が高い場合は提案に留める
+        output:
+          section: refactoring
+          kind: paragraph
+          markdown: 依頼範囲外のリファクタリングが必要だと判断した場合は、実施せず提案に留めてください。
+      - id: allowed_when_beneficial
+        label: 保守性向上につながる場合は実施してよい
+        output:
+          section: refactoring
+          kind: paragraph
+          markdown: 保守性の向上に明確につながる場合は、関連箇所のリファクタリングを行って構いません。
+      - id: encouraged
+        label: 積極的に実施する
+        output:
+          section: refactoring
+          kind: paragraph
+          markdown: 変更内容と整合する範囲で、保守性を高めるリファクタリングを積極的に行ってください。
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: リファクタリング方針を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: refactoring
+          kind: paragraph
+          template: "{{ value }}"
+
+  dependencies.addition_policy:
+    label: 新しい依存関係を追加してよいですか？
+    type: single_select
+    order: 100
+    skippable: true
+    options:
+      - id: forbidden
+        label: 追加しない
+        output:
+          section: dependencies
+          kind: paragraph
+          markdown: 新しい依存関係は追加しないでください。
+      - id: ask_first
+        label: 追加前に確認する
+        followups:
+          - dependencies.selection_priorities
+        output:
+          section: dependencies
+          kind: paragraph
+          markdown: 新しい依存関係を追加する前に、必要性を説明して確認してください。
+      - id: explain_then_add
+        label: 必要性を説明すれば追加してよい
+        followups:
+          - dependencies.selection_priorities
+        output:
+          section: dependencies
+          kind: paragraph
+          markdown: 新しい依存関係を追加する場合は、その必要性を明示してください。
+      - id: maintained_packages_allowed
+        label: 一般的で保守されているものなら追加してよい
+        followups:
+          - dependencies.selection_priorities
+        output:
+          section: dependencies
+          kind: paragraph
+          markdown: 一般的に利用され、継続的に保守されている依存関係であれば追加して構いません。
+      - id: unrestricted
+        label: 自由に追加してよい
+        followups:
+          - dependencies.selection_priorities
+        output:
+          section: dependencies
+          kind: paragraph
+          markdown: 実装上必要であれば、新しい依存関係を追加して構いません。
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: 依存関係の追加方針を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        followups:
+          - dependencies.selection_priorities
+        output:
+          section: dependencies
+          kind: paragraph
+          template: "{{ value }}"
+
+  dependencies.selection_priorities:
+    label: 依存関係を選ぶ際に優先することはありますか？
+    type: multi_select
+    order: 101
+    skippable: true
+    allow_custom: true
+    custom_input:
+      label: 自由入力
+      repeatable: true
+      history:
+        enabled: true
+      user_template:
+        enabled: true
+    output:
+      section: dependencies
+      kind: selected_option_bullets
+    options:
+      - id: standard_library
+        label: 標準ライブラリを優先する
+        markdown: 標準ライブラリで実現できる場合は、新しい依存関係を追加しないでください。
+      - id: existing_dependencies
+        label: 既存の依存関係を優先する
+        markdown: 新しいライブラリを追加する前に、既存の依存関係で実現できないか確認してください。
+      - id: lightweight
+        label: 軽量なものを優先する
+        markdown: 同等の候補がある場合は、依存範囲が小さく軽量なものを優先してください。
+      - id: actively_maintained
+        label: 活発に保守されているものを優先する
+        markdown: 継続的に保守され、利用実績のある依存関係を優先してください。
+      - id: license_check
+        label: ライセンスを確認する
+        markdown: 依存関係を追加する前に、プロジェクトで利用可能なライセンスか確認してください。
+      - id: security_check
+        label: セキュリティ上の問題がないか確認する
+        markdown: 依存関係を追加する前に、既知の重大な脆弱性がないか確認してください。
+
+  compatibility.policy:
+    label: 既存の公開APIや後方互換性をどう扱いますか？
+    type: single_select
+    order: 110
+    skippable: true
+    options:
+      - id: must_preserve
+        label: 必ず維持する
+        output:
+          section: compatibility
+          kind: paragraph
+          markdown: 既存の公開APIと後方互換性を維持してください。
+      - id: preserve_or_propose
+        label: 原則維持し、変更が必要なら提案する
+        output:
+          section: compatibility
+          kind: paragraph
+          markdown: 既存の公開APIと後方互換性は原則として維持し、変更が必要な場合は事前に提案してください。
+      - id: design_over_compatibility
+        label: 互換性より設計改善を優先する
+        output:
+          section: compatibility
+          kind: paragraph
+          markdown: 必要な場合は、後方互換性より設計上の一貫性と保守性を優先して構いません。
+      - id: not_applicable
+        label: このプロジェクトでは考慮不要
+        recommendation:
+          answer_equals:
+            question: project.status
+            option: new
+          score: 100
+        output: null
+      - id: custom
+        label: 自由入力
+        input:
+          kind: plain
+          placeholder: 互換性方針を、そのまま出力できる文章で入力してください
+          history:
+            enabled: true
+          user_template:
+            enabled: true
+        output:
+          section: compatibility
+          kind: paragraph
+          template: "{{ value }}"
+
+  guardrails:
+    label: 変更してはいけないもの、または事前確認が必要な作業はありますか？
+    type: group
+    order: 120
+    skippable: true
+    children:
+      - guardrails.prohibited
+      - guardrails.confirm_first
+
+  guardrails.prohibited:
+    label: 変更・実行してはいけないものはありますか？
+    type: multi_select
+    order: 121
+    skippable: true
+    allow_custom: true
+    custom_input:
+      label: 自由入力
+      repeatable: true
+      history:
+        enabled: true
+      user_template:
+        enabled: true
+    output:
+      section: guardrails
+      kind: selected_option_bullets
+      lead: 以下は行わないでください。
+    options:
+      - id: generated_files
+        label: 生成ファイルを直接編集しない
+        markdown: 生成ファイルを直接編集しないでください。
+      - id: lockfile_unnecessary
+        label: ロックファイルを不用意に更新しない
+        markdown: 変更に不要なロックファイルの更新は行わないでください。
+      - id: run_migrations
+        label: マイグレーションを実行しない
+        markdown: データベースマイグレーションを実行しないでください。
+      - id: production_settings
+        label: 本番環境の設定を変更しない
+        markdown: 本番環境の設定を変更しないでください。
+      - id: secrets
+        label: 秘密情報を追加・出力しない
+        markdown: 秘密情報、認証情報、個人情報をコードや出力へ含めないでください。
+      - id: database_schema
+        label: データベース構造を変更しない
+        markdown: データベース構造を変更しないでください。
+      - id: cicd
+        label: CI/CD設定を変更しない
+        markdown: CI/CD設定を変更しないでください。
+
+  guardrails.confirm_first:
+    label: 事前確認が必要な作業はありますか？
+    type: multi_select
+    order: 122
+    skippable: true
+    allow_custom: true
+    custom_input:
+      label: 自由入力
+      repeatable: true
+      history:
+        enabled: true
+      user_template:
+        enabled: true
+    output:
+      section: guardrails
+      kind: selected_option_bullets
+      lead: 以下を行う前に確認してください。
+    options:
+      - id: add_dependency
+        label: 新しい依存関係の追加
+        markdown: 新しい依存関係を追加すること。
+      - id: database_change
+        label: データベース変更
+        markdown: データベースの構造や永続化方式を変更すること。
+      - id: public_api_change
+        label: 公開API変更
+        markdown: 公開APIや外部インターフェースを変更すること。
+      - id: large_refactoring
+        label: 大規模リファクタリング
+        markdown: 複数の責務や広い範囲に影響するリファクタリングを行うこと。
+      - id: cicd_change
+        label: CI/CD変更
+        markdown: CI/CD設定やデプロイ手順を変更すること。
+      - id: security_change
+        label: セキュリティ関連変更
+        markdown: 認証、認可、暗号化などのセキュリティ関連処理を変更すること。
+      - id: breaking_change
+        label: 破壊的変更
+        markdown: 既存利用者や既存データへ影響する破壊的変更を行うこと。
+
+  completion.report:
+    label: 作業完了時に報告してほしい内容は何ですか？
+    type: multi_select
+    order: 130
+    skippable: true
+    allow_custom: true
+    custom_input:
+      label: 自由入力
+      repeatable: true
+      history:
+        enabled: true
+      user_template:
+        enabled: true
+    output:
+      section: completion_report
+      kind: selected_option_bullets
+      lead: 作業完了時には、以下を報告してください。
+    options:
+      - id: changes
+        label: 変更内容
+        markdown: 実施した変更内容
+      - id: reasons
+        label: 変更理由
+        markdown: 変更した理由
+      - id: tests
+        label: 実行したテスト
+        markdown: 実行したテストとその結果
+      - id: checks
+        label: 静的解析やビルドの結果
+        markdown: 実行した静的解析、整形、ビルドとその結果
+      - id: unverified
+        label: 未実行の確認項目
+        markdown: 実行できなかった確認項目とその理由
+      - id: known_issues
+        label: 既知の問題
+        markdown: 既知の問題や残っている制約
+      - id: follow_up
+        label: 今後必要な作業
+        markdown: 今後必要な作業や追加対応
+      - id: changed_files
+        label: 変更したファイル
+        markdown: 変更した主要なファイル

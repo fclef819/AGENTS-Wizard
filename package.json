@@ -3,11 +3,23 @@
   "version": "0.1.1",
   "description": "Interactive AGENTS.md generator",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fclef819/AGENTS-Wizard"
+  },
   "type": "module",
-  "bin": { "agents-wizard": "./dist/cli.js" },
-  "files": ["dist", "questions.yaml", "README.md"],
+  "bin": {
+    "agents-wizard": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "questions.yaml",
+    "README.md"
+  ],
   "packageManager": "pnpm@11.11.0",
-  "engines": { "node": ">=22" },
+  "engines": {
+    "node": ">=22"
+  },
   "scripts": {
     "check": "biome check . && tsc --noEmit",
     "test": "vitest run",
